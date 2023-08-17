@@ -1,0 +1,55 @@
+version: '3'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      tags:
+        - "0.0.1"
+    container_name: ebr
+    networks:
+      - ebr
+    environment:
+      - PORT=9999
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=adminpw
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=ebr
+    depends_on:
+      - mysql
+    ports:
+      - 9999:9999
+    restart: always
+  mysql: 
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    container_name: mysql
+    networks:
+      - mysql
+      - ebr
+    environment:
+      - MYSQL_ROOT_PASSWORD=adminpw
+      - MYSQL_USER=admin
+      - MYSQL_PASSWORD=adminpw
+      - MYSQL_DATABASE=ebr
+  phpmyadmin:
+    image: phpmyadmin:5.2
+    ports:
+      - "3000:80"
+    container_name: phpmyadmin
+    depends_on:
+      - mysql
+    restart: always
+    networks:
+      - mysql
+      - ebr
+    environment:
+      - PMA_PORT=3306
+      - PMA_HOST=mysql
+networks:
+  mysql:
+    driver: bridge
+  ebr: 
+    driver: bridge
