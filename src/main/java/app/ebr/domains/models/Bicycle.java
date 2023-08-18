@@ -24,6 +24,13 @@ public class Bicycle {
     @Column(name = "id")
     private int id;
 
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "parking_lot_id")
+    private ParkingLot parkingLot;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @Enumerated(EnumType.ORDINAL)
     @Column(name = "bicycle_type")
@@ -52,12 +59,21 @@ public class Bicycle {
         return id;
     }
 
-  
+    public void setParkingLot(ParkingLot parkingLot) {
+        this.parkingLot = parkingLot;
+    }
 
-    
+    public ParkingLot getParkingLot() {
+        return parkingLot;
+    }
 
+    public void setUser(User user) {
+        this.user = user;
+    }
 
-    
+    public User getUser() {
+        return user;
+    }
 
     public void setTimeStarted(Date timeStarted) {
         this.timeStarted = timeStarted;
