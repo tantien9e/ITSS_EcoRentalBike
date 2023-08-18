@@ -47,4 +47,49 @@ public class BicycleController {
         return new ResponseEntity<List<Bicycle>>(_bicycles, HttpStatus.OK);
     }
 
+    @GetMapping(value = "/{id}")
+    public ResponseEntity<Bicycle> get(@PathVariable(required = true) int id) {
+        Optional<Bicycle> bicycle = this.bicycleRepository.findById(id);
+        if (bicycle.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<Bicycle>(bicycle.get(), HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/{id}/borrow")
+    public ResponseEntity<?> borrowBicycle(
+            @RequestHeader(required = true, name = HttpHeaders.AUTHORIZATION) String authorization,
+            @PathVariable(required = true) int id) {
+        String[] _authorization = authorization.split(" ");
+        if (_authorization.length != 2 && !_authorization[0].equals("Bearer")) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        Algorithm algorithm = Algorithm.HMAC256("secret");
+        JWTVerifier verifier = JWT.require(algorithm).build();
+        try {
+            DecodedJWT decodedJWT = verifier.verify(_authorization[1]);
+            int uuid = decodedJWT.getClaim("uuid").asInt();
+            User user = this.userService.viewUserById(uuid);
+            if (user == null) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            /// Replace
+            Optional<Bicycle> bicycle = this.bicycleRepository.findById(id);
+            if (bicycle.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            Bicycle _bicycle = bicycle.get();
+            if (_bicycle.getUser() != null) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+            _bicycle.setUser(user);
+            _bicycle.setParkingLot(null);
+            _bicycle.setTimeStarted(new Date());
+            this.bicycleRepository.save(_bicycle);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+    }
+
 }
