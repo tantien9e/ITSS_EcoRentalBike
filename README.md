@@ -5,9 +5,11 @@
 ```sh 
 docker compose up -d
 ```
+## Khởi tạo Database : vào link
+```
+http://localhost:9999/initial
+```
 
-vào dashboard của docker chạy lại phần sql \
-vào đường dẫn localhost:9999\initial để setup data
 
 Nội dung folder
 - controllers : chứa các routing
